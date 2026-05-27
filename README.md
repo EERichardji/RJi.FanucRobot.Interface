@@ -68,25 +68,24 @@ bool connected = await robot.ConnectAsync("192.168.1.100", port: 60008);
 robot.Disconnect();
 ```
 
-### Dependency Injection (MSDI)
+## Interface & Extensibility
+This library exposes a single core interface **IFanucRobotClient** 
+that enables full **dependency injection support** and unlimited extensibility.
+
+By using this interface, you can easily:
+- Register your robot client as a service with any DI container
+- Create **unit tests** by mocking the interface
+- Build **wrapper / decorator** patterns (logging, error handling, retry)
+- Implement **observer / monitoring services** (background polling, data change notification)
+- Push real-time data to subscribers (e.g., JSON messages, UI updates, IoT messages)
+- Design clean, maintainable, and testable industrial applications
+
+The interface keeps your core library clean 
+while allowing YOU to design the upper-layer logic 
+that best fits your application.
 
 ```csharp
-// IServiceCollection registration
-services.AddSingleton<IFanucRobotClient>(sp =>
-{
-    var config = new RobotConnectionConfig
-    {
-        IpAddress = "192.168.1.100",
-        Port = 60008
-    };
-    var client = new FanucRobotClient(config);
-    client.Connect();
-    return client;
-});
-
-// Or use factory pattern for deferred connection
 services.AddSingleton<IFanucRobotClient>(new FanucRobotClient(config));
-// Call Connect() manually when needed
 ```
 
 ## API Overview
