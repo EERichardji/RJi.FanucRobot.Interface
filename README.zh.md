@@ -573,12 +573,12 @@ string comment = robot.Comment.Read("DI", 1);
 string comment = await robot.Comment.ReadAsync("SR", 1);
 
 // 通过枚举写入 DO[C1]（数字输出第 1 路注释）
-bool ok = robot.Comment.Write(CommentType.DO, index: 1, value: "抓取工位");
-bool ok = await robot.Comment.WriteAsync(CommentType.DO, index: 1, value: "抓取工位");
+robot.Comment.Write(CommentType.DO, index: 1, value: "抓取工位");
+await robot.Comment.WriteAsync(CommentType.DO, index: 1, value: "抓取工位");
 
 // 通过字符串前缀写入
-bool ok = robot.Comment.Write("R", 5, "温度阈值");
-bool ok = await robot.Comment.WriteAsync("SR", 1, "产品名称");
+robot.Comment.Write("R", 5, "温度阈值");
+await robot.Comment.WriteAsync("SR", 1, "产品名称");
 ```
 
 **CommentType 枚举（共 19 种）：**
