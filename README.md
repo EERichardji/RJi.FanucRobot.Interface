@@ -569,12 +569,12 @@ string comment = robot.Comment.Read("DI", 1);
 string comment = await robot.Comment.ReadAsync("SR", 1);
 
 // Write comment via enum DO[C1] (digital output channel 1 comment)
-bool ok = robot.Comment.Write(CommentType.DO, index: 1, value: "Gripper Station");
-bool ok = await robot.Comment.WriteAsync(CommentType.DO, index: 1, value: "Gripper Station");
+robot.Comment.Write(CommentType.DO, index: 1, value: "Gripper Station");
+await robot.Comment.WriteAsync(CommentType.DO, index: 1, value: "Gripper Station");
 
 // Write comment via string prefix
-bool ok = robot.Comment.Write("R", 5, "Temperature Threshold");
-bool ok = await robot.Comment.WriteAsync("SR", 1, "Product Name");
+robot.Comment.Write("R", 5, "Temperature Threshold");
+await robot.Comment.WriteAsync("SR", 1, "Product Name");
 ```
 
 **CommentType Enum (19 types total):**
