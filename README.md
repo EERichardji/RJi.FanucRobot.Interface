@@ -1,6 +1,6 @@
 # RJi.FanucRobot.Interface  
 [简体中文](README.zh.md)
-> This library is a **binary obfuscated class library** based on .NET Standard 2.0. Only the DLL assembly is provided; **source code is not included**.
+> This library is based on .NET Standard 2.0 and .NET 8.0.
 
 ## ⚠️ Important Disclaimer
 
@@ -10,9 +10,19 @@
 
 ## Overview
 
-A .NET port of the FANUC robot PC Interface, implemented based on the SNPX protocol. **No FRRJIf.dll installation required**.
+A .NET port of the FANUC robot PC Interface, implemented based on the SNPX protocol. **No FRRJIf.dll or official dependencies required**.
 
-Supports FANUC R-J3iB / R-30iA / R-30iB / R-30iB Plus controllers (requires option **R651** or **R650+R553**).
+Supports the following FANUC controllers (requires option **R651** or **R650+R553**):
+
+- **R-J3iB**: 7D80/45+, 7D81/09+, 7D82/01+
+- **R-J3iB Mate**: 7D91/01+
+- **R-30iA / R-30iA Mate**: All versions
+- **R-30iB / R-30iB Mate**: All versions
+- **R-30iB Plus / Mate Plus / Compact Plus / Mini Plus**: All versions
+
+**Option details:**
+- **R651 (FRL Params)**: Built-in SNPX support, no additional option required
+- **R650 (FRA Params)**: Requires **R553 (HMI Device SNPX)** to be selected together
 
 ## Installation
 
@@ -557,6 +567,14 @@ string comment = await robot.Comment.ReadAsync(CommentType.SI, index: 1);
 // Read via string prefix
 string comment = robot.Comment.Read("DI", 1);
 string comment = await robot.Comment.ReadAsync("SR", 1);
+
+// Write comment via enum DO[C1] (digital output channel 1 comment)
+bool ok = robot.Comment.Write(CommentType.DO, index: 1, value: "Gripper Station");
+bool ok = await robot.Comment.WriteAsync(CommentType.DO, index: 1, value: "Gripper Station");
+
+// Write comment via string prefix
+bool ok = robot.Comment.Write("R", 5, "Temperature Threshold");
+bool ok = await robot.Comment.WriteAsync("SR", 1, "Product Name");
 ```
 
 **CommentType Enum (19 types total):**
@@ -618,7 +636,7 @@ catch (RobotException ex)
 | **Current Position**       | `AddCurPosUF` + `Refresh`                                       | `robot.Position.ReadWorldPosition/ReadJointPosition`            |
 | **Task Monitoring**        | `AddTask` + `Refresh`                                           | `robot.Task.Read` supports multiple TaskTypes                   |
 | **Alarm Management**       | `AddAlarm` + `GetValue` (requires type and count specification) | `robot.Alarm.Read` supports AlarmType + AlarmMessageMode        |
-| **Comment Reading**        | Indirect via `AddSysVar(XX_COMMENT)`                            | `robot.Comment.Read` supports CommentType enum or string prefix |
+| **Comment Read/Write**     | Indirect via `AddSysVar(XX_COMMENT)`                            | `robot.Comment.Read/Write` supports CommentType enum or string prefix |
 | **Clear Alarm**            | `ClearAlarm(type)`                                              | `robot.ClearAlarm/ClearAlarmAsync`                              |
 | **Capacity Limit**         | DataTable fixed size, must create new DataTable if exceeded     | Three-level cache auto-management, no theoretical upper limit   |
 | **Data Management**        | Manual: AddXXX → Refresh → GetValue                             | Auto SETASG + caching, ready-to-use                             |
