@@ -1,6 +1,8 @@
 # RJi.FanucRobot.Interface
+
 [English](README.md)
-> 本库为基于 .NET Standard 2.0 的**二进制混淆类库**，仅提供 DLL 程序集，**不提供源代码**。
+
+> 本库为基于 .NET Standard 2.0 和 .NET 8.0 的类库。
 
 ## ⚠️ 重要免责声明
 
@@ -10,9 +12,20 @@
 
 ## 正文
 
-FANUC 机器人 PC Interface 的 .NET 翻写库，基于 SNPX 协议实现，**无需安装 FRRJIf.dll** 即可运行。
+FANUC 机器人 PC Interface 的 .NET 翻写库，基于 SNPX 协议实现，**无需安装 FRRJIf.dll 及官方依赖** 即可运行。
 
-支持 FANUC R-J3iB / R-30iA / R-30iB / R-30iB Plus 等控制器（要求选件 **R651** 或 **R650+R553**）。
+支持以下 FANUC 控制器（要求选件 **R651** 或 **R650+R553**）：
+
+- **R-J3iB**：7D80/45+、7D81/09+、7D82/01+
+- **R-J3iB Mate**：7D91/01+
+- **R-30iA / R-30iA Mate**：全部版本
+- **R-30iB / R-30iB Mate**：全部版本
+- **R-30iB Plus / Mate Plus / Compact Plus / Mini Plus**：全部版本
+
+**选件说明：**
+
+- **R651（FRL Params）**：已内置 SNPX 通信支持，无需额外选件
+- **R650（FRA Params）**：需同时选配 **R553（HMI Device SNPX）** 方可使用
 
 ## 安装
 
@@ -558,6 +571,14 @@ string comment = await robot.Comment.ReadAsync(CommentType.SI, index: 1);
 // 通过字符串前缀读取
 string comment = robot.Comment.Read("DI", 1);
 string comment = await robot.Comment.ReadAsync("SR", 1);
+
+// 通过枚举写入 DO[C1]（数字输出第 1 路注释）
+bool ok = robot.Comment.Write(CommentType.DO, index: 1, value: "抓取工位");
+bool ok = await robot.Comment.WriteAsync(CommentType.DO, index: 1, value: "抓取工位");
+
+// 通过字符串前缀写入
+bool ok = robot.Comment.Write("R", 5, "温度阈值");
+bool ok = await robot.Comment.WriteAsync("SR", 1, "产品名称");
 ```
 
 **CommentType 枚举（共 19 种）：**
@@ -719,27 +740,27 @@ catch (RobotException ex)
 
 ## 与官方库 API 对比
 
-| 功能             | 官方库（FRRJIf.dll）                                    | 本库                                                   |
-| ---------------- | ------------------------------------------------------- | ------------------------------------------------------ |
-| **依赖**         | 需安装 FRRJIf.dll，仅 Windows                           | 纯 .NET Standard 2.0，跨平台                           |
-| **连接**         | `Core.Connect(hostName)`                                | `robot.Connect(ip, port)` / 无参重载                   |
-| **断开**         | `Core.Disconnect()`                                     | `robot.Disconnect()`                                   |
-| **数字信号**     | `ReadSdo/Sdi/Rdo/Rdi/So/Si/Uo/Ui` 传 `Array` + `Count`  | `robot.DI.ReadSingle/Read` 直接返回 `bool`/`bool[]`    |
-| **组信号**       | `ReadGo/Gi/WriteGo/Gi` 传 `Array`                       | `robot.GI.Read/Write` 直接返回 `short[]`               |
-| **模拟信号**     | 通过 GI/GO 索引 +1000 间接访问                          | `robot.AI/AO.ReadSingle/WriteSingle` 直接读写          |
-| **PMC 信号**     | `ReadSdo(Index≥11001)` + `ReadPmcr2`                    | `robot.Pmc.ReadRelay/ReadKeep/ReadData` 分类访问       |
-| **数值寄存器**   | `AddNumReg → GetValue/SetValues`（需 DataTable 预注册） | `robot.NumReg.Read/Write/ReadBatch` 即用即读           |
-| **位置寄存器**   | `AddPosReg` 或 `AddPosRegXyzwpr` + `Refresh`            | `robot.PosReg.Read/WriteJoint/WriteCartesian`          |
-| **字符串寄存器** | `AddSysVar(STRREG)` 间接访问                            | `robot.StrReg.Read/Write/ReadBatch`                    |
-| **标志寄存器**   | `AddFlag` + `Refresh`                                   | `robot.Flag.Read/Write/ReadBatch`                      |
-| **系统变量**     | `AddSysVar/AddSysVarPos` + `Refresh`（需逐条注册）      | `robot.SystemVariables.ReadXxx/WriteXxx` 直接读写      |
-| **系统变量批量** | 需逐条 AddSysVar，受 DataTable 容量限制                 | `CreateVariableGroup` 一次注册、批量读写               |
-| **当前位置**     | `AddCurPosUF` + `Refresh`                               | `robot.Position.ReadWorldPosition/ReadJointPosition`   |
-| **任务监控**     | `AddTask` + `Refresh`                                   | `robot.Task.Read` 支持多种 TaskType                    |
-| **报警管理**     | `AddAlarm` + `GetValue`（需指定类型和数量）             | `robot.Alarm.Read` 支持 AlarmType + AlarmMessageMode   |
-| **注释读取**     | `AddSysVar(XX_COMMENT)` 间接访问                        | `robot.Comment.Read` 支持 CommentType 枚举或字符串前缀 |
-| **清除报警**     | `ClearAlarm(type)`                                      | `robot.ClearAlarm/ClearAlarmAsync`                     |
-| **容量限制**     | DataTable 固定大小，超限需新建 DataTable                | 三级缓存自动管理，无理论上限                           |
-| **数据管理**     | 需手动 AddXXX → Refresh → GetValue                      | 自动 SETASG + 缓存，即用即读                           |
-| **同步版本**     | 仅有同步                                                | 同步 + 异步 (`Async` 后缀)                             |
-| **依赖注入**     | 不支持                                                  | 支持 MSDI 注册                                         |
+| 功能             | 官方库（FRRJIf.dll）                                    | 本库                                                         |
+| ---------------- | ------------------------------------------------------- | ------------------------------------------------------------ |
+| **依赖**         | 需安装 FRRJIf.dll，仅 Windows                           | 纯 .NET Standard 2.0，跨平台                                 |
+| **连接**         | `Core.Connect(hostName)`                                | `robot.Connect(ip, port)` / 无参重载                         |
+| **断开**         | `Core.Disconnect()`                                     | `robot.Disconnect()`                                         |
+| **数字信号**     | `ReadSdo/Sdi/Rdo/Rdi/So/Si/Uo/Ui` 传 `Array` + `Count`  | `robot.DI.ReadSingle/Read` 直接返回 `bool`/`bool[]`          |
+| **组信号**       | `ReadGo/Gi/WriteGo/Gi` 传 `Array`                       | `robot.GI.Read/Write` 直接返回 `short[]`                     |
+| **模拟信号**     | 通过 GI/GO 索引 +1000 间接访问                          | `robot.AI/AO.ReadSingle/WriteSingle` 直接读写                |
+| **PMC 信号**     | `ReadSdo(Index≥11001)` + `ReadPmcr2`                    | `robot.Pmc.ReadRelay/ReadKeep/ReadData` 分类访问             |
+| **数值寄存器**   | `AddNumReg → GetValue/SetValues`（需 DataTable 预注册） | `robot.NumReg.Read/Write/ReadBatch` 即用即读                 |
+| **位置寄存器**   | `AddPosReg` 或 `AddPosRegXyzwpr` + `Refresh`            | `robot.PosReg.Read/WriteJoint/WriteCartesian`                |
+| **字符串寄存器** | `AddSysVar(STRREG)` 间接访问                            | `robot.StrReg.Read/Write/ReadBatch`                          |
+| **标志寄存器**   | `AddFlag` + `Refresh`                                   | `robot.Flag.Read/Write/ReadBatch`                            |
+| **系统变量**     | `AddSysVar/AddSysVarPos` + `Refresh`（需逐条注册）      | `robot.SystemVariables.ReadXxx/WriteXxx` 直接读写            |
+| **系统变量批量** | 需逐条 AddSysVar，受 DataTable 容量限制                 | `CreateVariableGroup` 一次注册、批量读写                     |
+| **当前位置**     | `AddCurPosUF` + `Refresh`                               | `robot.Position.ReadWorldPosition/ReadJointPosition`         |
+| **任务监控**     | `AddTask` + `Refresh`                                   | `robot.Task.Read` 支持多种 TaskType                          |
+| **报警管理**     | `AddAlarm` + `GetValue`（需指定类型和数量）             | `robot.Alarm.Read` 支持 AlarmType + AlarmMessageMode         |
+| **注释读写**     | `AddSysVar(XX_COMMENT)` 间接访问                        | `robot.Comment.Read/Write` 支持 CommentType 枚举或字符串前缀 |
+| **清除报警**     | `ClearAlarm(type)`                                      | `robot.ClearAlarm/ClearAlarmAsync`                           |
+| **容量限制**     | DataTable 固定大小，超限需新建 DataTable                | 三级缓存自动管理，无理论上限                                 |
+| **数据管理**     | 需手动 AddXXX → Refresh → GetValue                      | 自动 SETASG + 缓存，即用即读                                 |
+| **同步版本**     | 仅有同步                                                | 同步 + 异步 (`Async` 后缀)                                   |
+| **依赖注入**     | 不支持                                                  | 支持 MSDI 注册                                               |
