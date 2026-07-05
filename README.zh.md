@@ -581,12 +581,13 @@ robot.Comment.Write("R", 5, "温度阈值");
 await robot.Comment.WriteAsync("SR", 1, "产品名称");
 ```
 
-**CommentType 枚举（共 19 种）：**
+**CommentType 枚举（共 20 种）：**
 
 信号注释：`DI` `DO` `RI` `RO` `UI` `UO` `SI` `SO` `GI` `GO` `AI` `AO` `WI` `WO` `WSI` `WSO`
 寄存器注释：`SR` `R` `PR`
+标志注释：`F`
 
-SNPX 格式示例：`SI[C1]` = SI 信号第 1 路注释，`R[C2]` = R 寄存器第 2 路注释。
+SNPX 格式示例：`SI[C1]` = SI 信号第 1 路注释，`R[C2]` = R 寄存器第 2 路注释，`F[C3]` = F 标志第 3 路注释。
 
 ---
 
