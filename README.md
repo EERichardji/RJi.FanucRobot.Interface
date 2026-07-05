@@ -577,11 +577,13 @@ robot.Comment.Write("R", 5, "Temperature Threshold");
 await robot.Comment.WriteAsync("SR", 1, "Product Name");
 ```
 
-**CommentType Enum (19 types total):**
+**CommentType Enum (20 types total):**
 
 Signal comments: `DI` `DO` `RI` `RO` `UI` `UO` `SI` `SO` `GI` `GO` `AI` `AO` `WI` `WO` `WSI` `WSO`
 
 Register/POS comments: `R` (numeric register) `SR` (string register) `PR` (position register)
+
+Flag comments: `F`
 
 ---
 
